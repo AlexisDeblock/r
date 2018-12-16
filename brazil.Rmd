@@ -9,7 +9,7 @@ output:
     toc_float: true
 ---
 # Apache Spark
-![](spark-logo-trademark.png)
+![](image/spark-logo-trademark.png)
 
 Apache Spark™ is a unified analytics engine for large-scale data processing.
 
@@ -19,18 +19,18 @@ Spark execute the totality of its data operation in the memory in real time. It 
 
 ## 1. Cluster overview
 
-![](cluster-overview.png)
+![](image/cluster-overview.png)
 Spark applications run as independent sets of processes on a cluster, coordinated by the SparkContext in the main program. The SparkContext can connect to several types of cluster managers (either Spark’s own standalone cluster manager, Mesos or YARN), which allocate resources across applications.
 
 Unfortunately, using spark throught this cluster has a cost.. This is the reason why, we will use spark in a local environment ! 
 
-![](RDD.png){width=250px}
+![](image/RDD.png){width=250px}
 
 Spark manage data throught Resilient Distributed Dataset ``RDD``. Data are split on different server machines and you can use ``dplyr`` package function to transform data as you wish.
 
 ## 2. Spark Tools
 
-![](sparktools.png)
+![](image/sparktools.png)
 
 There is 4 main tools in Apache Spark:
 
@@ -55,6 +55,7 @@ Our X variables are financial data on brazil (interest rate, exchange rate, pric
 8. NASDAQ Brazil Utilities AUD Index
 
 ```{r packages, message=FALSE, warning=FALSE, include=FALSE}
+setwd("~/Documents/github/r")
 library(tidyverse)
 library(caret)
 library(ggplot2)
@@ -72,9 +73,9 @@ data = Quandl(c("BCB/12501","BCB/7812","BCB/10813","CEPEA/COFFEE_A.1",
                 "CEPEA/ETHANOL_AS.1","CHRIS/CME_BR1.1",
                 "JODI/OIL_RSEXKT_BRA.1","NASDAQOMX/NQBR7000AUD.1"),
               start_date="1990-01-01", end_date="2017-05-01", collapse="monthly")
-data
  # 20% de NA dans les données
 ```
+
 ```{r, dependson="données", results="hide"}
 round(sum(is.na(data)) / (ncol(data) * nrow(data)),digits=2)
 ```
@@ -85,11 +86,11 @@ There is `r round(100 * sum(is.na(data)) / (ncol(data) * nrow(data)),digits=2)` 
 
 We transform country notation into grades from factor 0 to 20. Brazil has grade 6 to 12 from january 1990 to may 2017.
 
-![](notation.jpg)
-
+![](image/notation.jpg)
+![](image/notation.png)
 
 ```{r données rating}
-rating<-read.csv("~/Desktop/RatingBrazil.csv", header=FALSE, sep=";")
+rating<-read.csv("file/RatingBrazil.csv", header=FALSE, sep=";")
 names(rating)<-c("date","fitch","sp")
 data$y<-rating$fitch 
 data$y <- data$y %>% as.factor()
@@ -214,7 +215,10 @@ Be careful, you should always remember to disconnect your spark session after yo
 spark_disconnect(sc)
 ```
 
-```{r include=FALSE}
+
+
+
+```{r, include=FALSE}
 data<-data %>%
   select(-Date)
 names(data)<-c("Ir delinquency","Ir central bank","Exchange rate","price coffee","price Ethanol","Real Futures","Fuel export","Nasdaq brazil", "y" )
@@ -227,7 +231,7 @@ ui <- pageWithSidebar(
     selectInput('xcol', 'X Variable', names(data)[-9]),
     selectInput('ycol', 'Y Variable', names(data)[-9],
                 selected=names(iris)[[2]]),
-    numericInput('clusters', 'Cluster count', 3,
+    numericInput('clusters', 'Cluster count', 7,
                  min = 1, max = 8)
   ),
   mainPanel(
@@ -274,4 +278,12 @@ data %>%
 ```
 
 
+```{r}
+library(GGally)
+GGally::ggpairs(data[,c(1,2,9)],ggplot2::aes(colour=y,alpha = 0.1))
+```
+
+```{r}
+devtools::session_info()
+```
 
